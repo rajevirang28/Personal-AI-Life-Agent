@@ -51,3 +51,8 @@ class TaskResponse(BaseModel):
     due_date: date | None
     created_at: datetime
     updated_at: datetime
+
+class TaskCountResponse(BaseModel):
+    total_tasks: int
+    completed_tasks: int
+    pending_tasks: int
