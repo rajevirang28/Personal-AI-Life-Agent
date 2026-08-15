@@ -1,15 +1,35 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 
 from app.database.database import Base
 
-# Define the User database model inheriting from SQLAlchemy's Base class
 class User(Base):
-    # Specify the name of the database table
     __tablename__ = "users"
 
-    # Primary key column
-    id = Column(Integer, primary_key=True, index=True)
-    # User's full name
-    name = Column(String(100), nullable=False)
-    # User's email
-    email = Column(String(150), unique=True, nullable=False, index=True)
+    id = Column(
+        Integer, 
+        primary_key=True, 
+        index=True
+    )
+    
+    name = Column(
+        String(100), 
+        nullable=False
+    )
+    
+    email = Column(
+        String(150), 
+        unique=True, 
+        nullable=False, 
+        index=True
+    )
+
+    hashed_password = Column(
+        String(255),
+        nullable=False
+    )
+
+    is_active = Column(
+        Boolean,
+        default=True,
+        nullable=False
+    )
