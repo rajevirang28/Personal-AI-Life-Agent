@@ -2,25 +2,27 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class TaskCreate(BaseModel):
     title: str = Field(
         ...,
-        min_length = 1,
-        max_length = 200
+        min_length=1,
+        max_length=200
     )
 
     description: str | None = None
 
     priority: str = Field(
-        default = "medium",
+        default="medium",
         pattern="^(low|medium|high)$"
     )
 
     due_date: date | None = None
 
+
 class TaskUpdate(BaseModel):
     title: str | None = Field(
-        default = None,
+        default=None,
         min_length=1,
         max_length=200
     )
@@ -39,8 +41,11 @@ class TaskUpdate(BaseModel):
 
     due_date: date | None = None
 
+
 class TaskResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
     id: int
     user_id: int
@@ -52,7 +57,10 @@ class TaskResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class TaskCountResponse(BaseModel):
+
+class TaskStatsResponse(BaseModel):
     total_tasks: int
     completed_tasks: int
     pending_tasks: int
+    in_progress_tasks: int
+    overdue_tasks: int
