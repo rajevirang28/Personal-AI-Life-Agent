@@ -6,9 +6,11 @@ from app.database.database import Base, engine
 # Import User model so SQLAlchemy registers it before table get created
 from app.models.user import User
 from app.models.task import Task
+from app.models.memory import Memory
 
 from app.api.tasks import router as task_router
 from app.api.auth import router as auth_router
+from app.api.memory import router as memory_router
 
 # Auto create all define database tables on application startup
 Base.metadata.create_all(
@@ -28,6 +30,10 @@ app.include_router(
 
 app.include_router(
     task_router
+)
+
+app.include_router(
+    memory_router
 )
 
 # Root: Returns a basic welcome message to verify the API is running
