@@ -6,18 +6,21 @@ from app.database.database import get_db
 
 from app.models.user import User
 
-from app.schemas.chat import(
+from app.schemas.chat import (
     ChatRequest,
     ChatResponse
 )
 
-from app.services.ai_service import generate_response
-from app.services.context_service import build_user_context
+from app.services.agent_service import (
+    run_agent
+)
+
 
 router = APIRouter(
     prefix="/chat",
     tags=["AI Chat"]
 )
+
 
 @router.post(
     "/",
@@ -30,24 +33,22 @@ def chat_with_ai(
         get_current_user
     )
 ):
-    
+
     try:
-        context = build_user_context(
+
+        response = run_agent(
             db=db,
-            user_id=current_user.id
+            user_id=current_user.id,
+            user_message=chat_data.message
         )
 
-        response = generate_response(
-            user_message=chat_data.message,
-            context=context
-        )
-
-        return{
+        return {
             "response": response
         }
-    
+
     except Exception as e:
+
         raise HTTPException(
             status_code=500,
-            detail=f"AI service error: {str(e)}"
+            detail=f"Agent error: {str(e)}"
         )
