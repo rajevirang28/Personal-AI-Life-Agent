@@ -52,3 +52,53 @@ def get_today_priorities(
     )
 
     return tasks
+
+def get_task_statistics(
+    db: Session,
+    user_id: int
+):
+    """
+    Return task statistics for the current user.
+    """
+
+    total = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id
+        )
+        .count()
+    )
+
+    completed = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id,
+            Task.status == "completed"
+        )
+        .count()
+    )
+
+    pending = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id,
+            Task.status == "pending"
+        )
+        .count()
+    )
+
+    in_progress = (
+        db.query(Task)
+        .filter(
+            Task.user_id == user_id,
+            Task.status == "in_progress"
+        )
+        .count()
+    )
+
+    return {
+        "total": total,
+        "completed": completed,
+        "pending": pending,
+        "in_progress": in_progress
+    }
