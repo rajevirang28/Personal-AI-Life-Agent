@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.services.ai_service import (
-    choose_tool,
+    choose_tools,
     generate_response
 )
 
@@ -20,12 +20,18 @@ def run_agent(
     user_message: str
 ):
 
-    decision = choose_tool(
+    decision = choose_tools(
         user_message
     )
 
+    print(
+        "\n[AGENT] Tool decision:"
+    )
+
+    print(decision)
+
     if not decision.get(
-        "use_tool",
+        "use_tools",
         False
     ):
 
@@ -33,55 +39,109 @@ def run_agent(
             user_message=user_message
         )
 
-    tool_name = decision.get(
-        "tool"
+    selected_tools = decision.get(
+        "tools",
+        []
     )
 
-    arguments = decision.get(
-        "arguments",
-        {}
-    )
+    if not selected_tools:
 
-    try:
-
-        result = execute_tool(
-            tool_name=tool_name,
-            arguments=arguments,
-            db=db,
-            user_id=user_id
+        return generate_response(
+            user_message=user_message
         )
 
-    except Exception as e:
+    tool_results = []
 
-        return (
-            "I couldn't access that "
-            f"information right now: {str(e)}"
+    for selected_tool in selected_tools:
+
+        tool_name = selected_tool.get(
+            "name"
         )
-    
-    tool_result = format_tool_result(
-        tool_name=tool_name,
-        result=result
+
+        arguments = selected_tool.get(
+            "arguments",
+            {}
+        )
+
+        print(
+            f"[AGENT] Executing tool: "
+            f"{tool_name}"
+        )
+
+        try:
+
+            result = execute_tool(
+                tool_name=tool_name,
+                arguments=arguments,
+                db=db,
+                user_id=user_id
+            )
+
+            formatted_result = (
+                format_tool_result(
+                    tool_name=tool_name,
+                    result=result
+                )
+            )
+
+            tool_results.append(
+                f"""
+                TOOL: {tool_name}
+
+                RESULT:
+
+                {formatted_result}
+                """
+            )
+
+        except Exception as e:
+
+            tool_results.append(
+                f"""
+                TOOL: {tool_name}
+
+                ERROR:
+
+                {str(e)}
+                """
+            )
+
+    combined_results = "\n".join(
+        tool_results
     )
 
-    final_context = f"""
+    print(
+        "[AGENT] Tool results:"
+    )
+
+    print(combined_results)
+
+    final_prompt = f"""
+You are a Personal AI Life
+and Productivity Agent.
+
 The user asked:
 
 {user_message}
 
-You used the tool:
+The following tools were executed:
 
-{tool_name}
+{combined_results}
 
-The tool returned:
-
-{tool_result}
-
-Use this information to answer
+Use the tool results to answer
 the user's question.
 
-Do not invent information.
+Rules:
+
+1. Do not invent information.
+2. Only use information from the
+   tool results when discussing
+   the user's personal data.
+3. If multiple tools returned information,
+   combine them into one useful answer.
+4. Be concise and practical.
 """
 
     return generate_response(
-        user_message=final_context
+        user_message=final_prompt
     )
