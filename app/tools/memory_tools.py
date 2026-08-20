@@ -33,3 +33,26 @@ def search_memories(
         .all()
     )
     return memories
+
+def get_goals(
+    db: Session,
+    user_id: int
+):
+    """
+    Return all goal memories
+    belonging to the current user.
+    """
+
+    goals = (
+        db.query(Memory)
+        .filter(
+            Memory.user_id == user_id,
+            Memory.memory_type == "goal"
+        )
+        .order_by(
+            Memory.created_at.desc()
+        )
+        .all()
+    )
+
+    return goals
