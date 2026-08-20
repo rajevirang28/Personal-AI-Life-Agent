@@ -40,5 +40,34 @@ def format_tool_result(
             )
 
         return "\n".join(lines)
+    
+    if tool_name == "get_task_statistics":
+
+        return (
+            f"Total tasks: {result['total']}\n"
+            f"Completed: {result['completed']}\n"
+            f"Pending: {result['pending']}\n"
+            f"In progress: {result['in_progress']}"
+        )
+    
+    if tool_name in [
+        "search_memories",
+        "get_goals"
+    ]:
+
+        if not result:
+            return "No memories found."
+
+        lines = []
+
+        for memory in result:
+
+            lines.append(
+                f"- [{memory.memory_type}] "
+                f"{memory.title}: "
+                f"{memory.content}"
+            )
+
+        return "\n".join(lines)
 
     return str(result)
