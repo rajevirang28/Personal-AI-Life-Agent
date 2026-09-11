@@ -1,4 +1,5 @@
 from datetime import date
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 
@@ -101,4 +102,38 @@ def get_task_statistics(
         "completed": completed,
         "pending": pending,
         "in_progress": in_progress
+    }
+
+def create_task(
+    db: Session,
+    user_id: int,
+    title: str,
+    description: str,
+    priority: str,
+    due_date: date = None
+):
+    task = Task(
+        user_id = user_id,
+        title = title,
+        description = description,
+        priority = priority,
+        due_date = due_date,
+        status = "pending"
+    )
+
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+    return {
+        "success": True,
+        "message": "Task created successfully",
+        "task": {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "priority": task.priority,
+            "status": task.status,
+            "due_date": str(task.due_date) if task.due_date else None
+        }
     }
